@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Sistema de Matrícula - Universidad de Panamá</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --azul:#003366;
+      --dorado:#d4af37;
+      --blanco:#ffffff;
+      --gris:#f5f5f5;
+      --suave:#eef3f8;
+      --radio:12px;
+      font-family: 'Inter', system-ui, Arial, sans-serif;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,var(--gris),#ffffff);color:#222;min-height:100vh}
+
+    /* Contenedor general */
+    .app{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+
+    /* Tarjeta de inicio de sesión */
+    .login-card{width:100%;max-width:420px;background:var(--blanco);border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,0.12);padding:28px}
+    .marca{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+    .marca .logo{width:56px;height:56px;border-radius:8px;background:linear-gradient(135deg,var(--azul),#1a4378);display:flex;align-items:center;justify-content:center;color:var(--blanco);font-weight:700;font-size:20px}
+    .marca h1{font-size:18px;margin:0}
+    .marca p{margin:0;font-size:12px;color:#555}
+
+    label{display:block;font-size:13px;margin:12px 0 6px}
+    input[type=text],input[type=password]{width:100%;padding:12px;border-radius:10px;border:1px solid #e1e6ee;background:#fbfdff}
+    .fila{display:flex;gap:12px}
+    .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:0;cursor:pointer;font-weight:600}
+    .btn-primario{background:var(--azul);color:var(--blanco)}
+    .muted{font-size:13px;color:#666;margin-top:8px}
+
+    /* Estructura principal luego de iniciar sesión */
+    .shell{width:100%;max-width:1200px;background:var(--blanco);border-radius:12px;box-shadow:0 12px 32px rgba(2,6,23,0.12);overflow:hidden}
+    header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #eef2f7}
+    .encabezado-izq{display:flex;align-items:center;gap:16px}
+    .encabezado-izq .logo{width:48px;height:48px;border-radius:8px;background:linear-gradient(135deg,var(--azul),#1a4378);display:flex;align-items:center;justify-content:center;color:var(--blanco);font-weight:700}
+    .botones-nav{display:flex;gap:12px;flex-wrap:wrap}
+    .boton-nav{width:120px;height:56px;border-radius:10px;background:var(--suave);display:flex;align-items:center;justify-content:center;font-weight:600;border:1px solid transparent;cursor:pointer}
+    .boton-nav:hover{transform:translateY(-3px);box-shadow:0 6px 18px rgba(2,6,23,0.06)}
+
+    .encabezado-der{display:flex;align-items:center;gap:12px}
+    .usuario-pill{padding:8px 12px;border-radius:999px;border:1px solid #e8eef8}
+
+    /* Cuerpo */
+    .contenido{display:flex;gap:20px;padding:24px;flex-wrap:wrap}
+    .izquierda{flex:1;min-width:300px}
+    .derecha{width:360px;min-width:280px}
+
+    /* Calendario */
+    .tarjeta{background:linear-gradient(180deg,var(--blanco),#fbfdff);padding:18px;border-radius:12px;border:1px solid #edf3fa}
+    .encabezado-calendario{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .titulo-mes{font-weight:700;font-size:18px}
+    .grid-calendario{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+    .nombre-dia{font-size:12px;text-align:center;color:#667085}
+    .dia{height:46px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:transparent}
+    .dia.hoy{background:linear-gradient(180deg,var(--azul),#1a4378);color:var(--blanco);font-weight:700}
+    .nav-pequeña{display:flex;gap:8px}
+
+    /* Trámites y recibos */
+    .grid-tarjetas{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-top:12px}
+    .tarjeta-pequeña{background:#ffffff;border-radius:12px;padding:14px;border:1px solid #eef4fb;display:flex;flex-direction:column;gap:8px;min-height:110px}
+    .tarjeta-pequeña h3{margin:0;font-size:15px}
+    .tarjeta-pequeña p{margin:0;font-size:13px;color:#556}
+    .cta{margin-top:auto;display:flex;gap:8px}
+    .btn-borde{background:transparent;border:1px solid var(--azul);color:var(--azul);padding:8px 10px;border-radius:8px}
+
+    /* Diseño adaptable */
+    @media (max-width:900px){
+      .contenido{flex-direction:column}
+      .derecha{width:100%}
+      .boton-nav{width:90px}
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="app">
+    <!-- VISTA DE INICIO DE SESIÓN -->
+    <div id="vistaLogin" class="login-card" aria-hidden="false">
+      <div class="marca">
+        <div class="logo">UP</div>
+        <div>
+          <h1>Sistema de Matrícula</h1>
+          <p>Universidad de Panamá</p>
+        </div>
+      </div>
+
+      <form id="formLogin">
+        <label for="usuario">Usuario o correo institucional</label>
+        <input id="usuario" type="text" placeholder="ejemplo@up.ac.pa" required />
+
+        <label for="clave">Contraseña</label>
+        <input id="clave" type="password" placeholder="Contraseña" required />
+
+        <div style="margin-top:14px;display:flex;gap:10px;align-items:center">
+          <button type="submit" class="btn btn-primario">Iniciar Sesión</button>
+          <button type="button" id="btnDemo" class="btn">Entrar como Demo</button>
+        </div>
+
+        <div class="muted">¿Olvidó su contraseña?</div>
+      </form>
+    </div>
+
+    <!-- VISTA PRINCIPAL (OCULTA HASTA INICIAR SESIÓN) -->
+    <div id="shell" class="shell" style="display:none">
+      <header>
+        <div class="encabezado-izq">
+          <div class="logo">UP</div>
+          <div>
+            <div style="font-weight:700">Sistema de Matrícula</div>
+            <div style="font-size:12px;color:#556">Universidad de Panamá</div>
+          </div>
+        </div>
+
+        <nav class="botones-nav" role="navigation" aria-label="Menú principal">
+          <div class="boton-nav" data-section="inicio">Inicio</div>
+          <div class="boton-nav" data-section="tramites">Trámites</div>
+          <div class="boton-nav" data-section="pagos">Recibo de Pagos</div>
+          <div class="boton-nav" data-section="calendario">Calendario</div>
+          <div class="boton-nav" id="btnCerrarSesion">Cerrar Sesión</div>
+        </nav>
+
+        <div class="encabezado-der">
+          <div class="usuario-pill" id="usuarioPill">Usuario</div>
+        </div>
+      </header>
+
+      <main class="contenido">
+        <section class="izquierda">
+          <div id="seccionInicio" class="tarjeta" style="margin-bottom:16px">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div>
+                <div style="font-weight:700;font-size:18px">Bienvenido al Sistema de Matrícula</div>
+                <div style="color:#556;font-size:13px;margin-top:6px">Aquí podrá realizar trámites, ver recibos y revisar el calendario académico.</div>
+              </div>
+              <div style="text-align:right">
+                <div id="textoHoy" style="font-size:13px;color:#444"></div>
+                <div style="font-size:11px;color:#7b8794">Universidad de Panamá</div>
+              </div>
+            </div>
+
+            <div class="grid-tarjetas">
+              <div class="tarjeta-pequeña">
+                <h3>Solicitud de Matrícula</h3>
+                <p>Inicie su proceso de inscripción en materias según su plan de estudios.</p>
+                <div class="cta"><button class="btn-borde">Ir a Matrícula</button><button class="btn">Abrir</button></div>
+              </div>
+
+              <div class="tarjeta-pequeña">
+                <h3>Ver materias inscritas</h3>
+                <p>Revise las materias que actualmente tiene inscritas y sus horarios.</p>
+                <div class="cta"><button class="btn-borde">Ver</button><button class="btn">Actualizar</button></div>
+              </div>
+
+              <div class="tarjeta-pequeña">
+                <h3>Solicitar retiro/adición</h3>
+                <p>Proceso para solicitar modificaciones a su matrícula.</p>
+                <div class="cta"><button class="btn-borde">Solicitar</button><button class="btn">Formulario</button></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="seccionTramites" class="tarjeta" style="display:none">
+            <h2 style="margin-top:0">Trámites</h2>
+            <div class="grid-tarjetas">
+              <div class="tarjeta-pequeña"><h3>Constancia de Estudio</h3><p>Solicite su constancia para trámites administrativos.</p></div>
+              <div class="tarjeta-pequeña"><h3>Certificado de Notas</h3><p>Descargue o solicite su certificado de notas.</p></div>
+              <div class="tarjeta-pequeña"><h3>Reingreso</h3><p>Inicie trámite de reingreso a la universidad.</p></div>
+            </div>
+          </div>
+
+          <div id="seccionPagos" class="tarjeta" style="display:none">
+            <h2 style="margin-top:0">Recibo de Pagos</h2>
+            <div class="tarjeta-pequeña"><h3>Historial de Pagos</h3><p>Ver y descargar recibos.</p></div>
+            <div style="margin-top:12px"><button class="btn">Generar Recibo</button></div>
+          </div>
+        </section>
+
+        <aside class="derecha">
+          <div id="tarjetaCalendario" class="tarjeta">
+            <div class="encabezado-calendario">
+              <div class="titulo-mes" id="tituloMes">Mes Año</div>
+              <div class="nav-pequeña">
+                <button id="mesAnterior" class="btn">◀</button>
+                <button id="mesSiguiente" class="btn">▶</button>
+              </div>
+            </div>
+            <div style="margin-bottom:10px;color:#425066;font-size:13px" id="textoFechaSeleccionada">Seleccionado: --</div>
+            <div class="grid-calendario" id="gridCalendario"></div>
+          </div>
+
+          <div style="height:16px"></div>
+
+          <div class="tarjeta">
+            <h3 style="margin-top:0">Accesos rápidos</h3>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+              <button class="btn-borde">Mi Perfil</button>
+              <button class="btn-borde">Horario</button>
+              <button class="btn-borde">Contacto Soporte</button>
+            </div>
+          </div>
+        </aside>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    // --- LOGIN SIMPLIFICADO ---
+    const vistaLogin = document.getElementById('vistaLogin')
+    const shell = document.getElementById('shell')
+    const formLogin = document.getElementById('formLogin')
+    const btnDemo = document.getElementById('btnDemo')
+    const usuarioPill = document.getElementById('usuarioPill')
+
+    function abrirSistema(nombreUsuario){
+      vistaLogin.style.display = 'none'
+      shell.style.display = 'block'
+      usuarioPill.textContent = nombreUsuario
+      mostrarSeccion('inicio')
+      renderizarCalendario(new Date())
+      actualizarTextoHoy()
+    }
+
+    formLogin.addEventListener('submit', (e)=>{
+      e.preventDefault()
+      const u = document.getElementById('usuario').value || 'Estudiante'
+      abrirSistema(u)
+    })
+
+    btnDemo.addEventListener('click', ()=>abrirSistema('Demo Estudiante'))
+
+    // Cerrar sesión
+    document.getElementById('btnCerrarSesion').addEventListener('click', ()=>{
+      shell.style.display='none'
+      vistaLogin.style.display='block'
+      document.getElementById('usuario').value=''
+      document.getElementById('clave').value=''
+    })
+
+    // Navegación de secciones
+    document.querySelectorAll('.boton-nav[data-section]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const s = btn.dataset.section
+        mostrarSeccion(s)
+      })
+    })
+
+    function mostrarSeccion(seccion){
+      document.getElementById('seccionInicio').style.display = (seccion==='inicio')? 'block' : 'none'
+      document.getElementById('seccionTramites').style.display = (seccion==='tramites')? 'block' : 'none'
+      document.getElementById('seccionPagos').style.display = (seccion==='pagos')? 'block' : 'none'
+      if(seccion==='calendario'){
+        document.getElementById('tarjetaCalendario').scrollIntoView({behavior:'smooth'})
+      }
+    }
+
+    // --- CALENDARIO DINÁMICO ---
+    const tituloMes = document.getElementById('tituloMes')
+    const gridCalendario = document.getElementById('gridCalendario')
+    const textoFechaSeleccionada = document.getElementById('textoFechaSeleccionada')
+    const btnMesAnterior = document.getElementById('mesAnterior')
+    const btnMesSiguiente = document.getElementById('mesSiguiente')
+    const textoHoy = document.getElementById('textoHoy')
+
+    let fechaVista = new Date()
+
+    function actualizarTextoHoy(){
+      const ahora = new Date()
+      const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
+      textoHoy.textContent = new Intl.DateTimeFormat('es-PA', opciones).format(ahora)
+    }
+
+    function renderizarCalendario(fecha){
+      fechaVista = new Date(fecha.getFullYear(), fecha.getMonth(), 1)
+      const año = fechaVista.getFullYear()
+      const mes = fechaVista.getMonth()
+      const nombreMes = new Intl.DateTimeFormat('es-PA', {month: 'long'}).format(fechaVista)
+      tituloMes.textContent = nombreMes.charAt(0).toUpperCase() + nombreMes.slice(1) + ' ' + año
+
+      gridCalendario.innerHTML = ''
+      const nombresDias = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom']
+      nombresDias.forEach(d=>{
+        const el = document.createElement('div')
+        el.className = 'nombre-dia'
+        el.textContent = d
+        gridCalendario.appendChild(el)
+      })
+
+      const primerDia = new Date(año, mes, 1)
+      const ultimoDia = new Date(año, mes + 1, 0)
+      const primerDiaSemana = (primerDia.getDay() + 6) % 7 // Ajuste para que lunes sea el primer día
+
+      // Rellenar días vacíos al inicio del mes
+      for(let i=0; i<primerDiaSemana; i++){
+        const vacio = document.createElement('div')
+        gridCalendario.appendChild(vacio)
+      }
+
+      // Crear los días del mes
+      for(let d=1; d<=ultimoDia.getDate(); d++){
+        const diaEl = document.createElement('div')
+        diaEl.className = 'dia'
+        diaEl.textContent = d
+
+        const hoy = new Date()
+        if(d === hoy.getDate() && mes === hoy.getMonth() && año === hoy.getFullYear()){
+          diaEl.classList.add('hoy')
+        }
+
+        diaEl.addEventListener('click', ()=>{
+          const fechaSeleccionada = new Date(año, mes, d)
+          const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
+          textoFechaSeleccionada.textContent = 'Seleccionado: ' + new Intl.DateTimeFormat('es-PA', opciones).format(fechaSeleccionada)
+        })
+
+        gridCalendario.appendChild(diaEl)
+      }
+    }
+
+    btnMesAnterior.addEventListener('click', ()=>{
+      const nuevaFecha = new Date(fechaVista.getFullYear(), fechaVista.getMonth() - 1, 1)
+      renderizarCalendario(nuevaFecha)
+    })
+
+    btnMesSiguiente.addEventListener('click', ()=>{
+      const nuevaFecha = new Date(fechaVista.getFullYear(), fechaVista.getMonth() + 1, 1)
+      renderizarCalendario(nuevaFecha)
+    })
+
+  </script>
+</body>
+</html>
+
